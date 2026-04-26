@@ -1,0 +1,326 @@
+# import pandas as pd
+# import numpy as np
+# import pickle
+# import warnings
+# warnings.filterwarnings("ignore")
+
+# from sklearn.model_selection import train_test_split, StratifiedKFold, cross_val_score
+# from sklearn.preprocessing import StandardScaler
+# from sklearn.pipeline import Pipeline
+# from sklearn.metrics import (
+#     accuracy_score, precision_score, recall_score,
+#     f1_score, confusion_matrix, classification_report,
+#     roc_auc_score
+# )
+# from sklearn.ensemble import RandomForestClassifier
+# from sklearn.svm import SVC
+# from imblearn.over_sampling import SMOTE          # pip install imbalanced-learn
+# import lightgbm as lgb
+
+# from deap import base, creator, tools, algorithms  # pip install deap
+# import pyswarms as ps                              # pip install pyswarms
+
+# # Configuration
+# DATASET_PATH  = "dataset.csv"
+# MODEL_OUTPUT  = "best_model.pkl"
+# SCALER_OUTPUT = "scaler.pkl"
+# CV_FOLDS      = 5
+# RANDOM_STATE  = 42
+
+
+# # ──────────────────────────────────────────────
+# # Data Loading
+# # ──────────────────────────────────────────────
+
+# def load_data():
+#     df = pd.read_csv(DATASET_PATH)
+#     drop_cols = [c for c in ["filename", "class"] if c in df.columns]
+#     X = df.drop(columns=drop_cols)
+#     y = df["class"]
+
+#     print(f"[*] Dataset: {X.shape[0]} samples, {X.shape[1]} features")
+#     print(f"    Class distribution: {dict(y.value_counts().sort_index())}")
+
+#     # Stratified split preserves class ratio in both sets
+#     return train_test_split(X, y, test_size=0.2, random_state=RANDOM_STATE, stratify=y)
+
+
+# # ──────────────────────────────────────────────
+# # Phase 1 — Handle Class Imbalance with SMOTE
+# # ──────────────────────────────────────────────
+
+# def apply_smote(X_train, y_train):
+#     """
+#     Oversamples the minority class using SMOTE so the classifier
+#     doesn't just predict 'benign' for everything.
+#     Only applied to training data — never touch test data.
+#     """
+#     print(f"[*] Applying SMOTE (before: {dict(y_train.value_counts().sort_index())})")
+#     sm = SMOTE(random_state=RANDOM_STATE)
+#     X_res, y_res = sm.fit_resample(X_train, y_train)
+#     print(f"    After SMOTE: {dict(pd.Series(y_res).value_counts().sort_index())}")
+#     return X_res, y_res
+
+
+# # ──────────────────────────────────────────────
+# # Phase 2a — Genetic Algorithm for Feature Selection
+# # (Uses cross-validation on TRAINING data only — no test leakage)
+# # ──────────────────────────────────────────────
+
+# def run_genetic_algorithm(X_train, y_train):
+#     print("\n[*] Starting Genetic Algorithm for Feature Selection...")
+
+#     n_features = X_train.shape[1]
+
+#     # Avoid duplicate creator registration on re-runs
+#     if not hasattr(creator, "FitnessGA"):
+#         creator.create("FitnessGA", base.Fitness, weights=(1.0, -0.05))
+#     if not hasattr(creator, "IndividualGA"):
+#         creator.create("IndividualGA", list, fitness=creator.FitnessGA)
+
+#     toolbox = base.Toolbox()
+#     toolbox.register("attr_bool", np.random.randint, 0, 2)
+#     toolbox.register("individual", tools.initRepeat, creator.IndividualGA,
+#                      toolbox.attr_bool, n=n_features)
+#     toolbox.register("population", tools.initRepeat, list, toolbox.individual)
+
+#     skf = StratifiedKFold(n_splits=3, shuffle=True, random_state=RANDOM_STATE)
+
+#     def eval_individual(individual):
+#         mask = [bool(b) for b in individual]
+#         if sum(mask) == 0:
+#             return 0.0, n_features   # penalise empty selection
+
+#         X_sel = X_train.iloc[:, mask]
+#         clf = lgb.LGBMClassifier(n_estimators=50, verbosity=-1, random_state=RANDOM_STATE)
+#         # Cross-validate on training data only — no test data ever seen here
+#         scores = cross_val_score(clf, X_sel, y_train, cv=skf, scoring="f1", n_jobs=-1)
+#         return float(scores.mean()), int(sum(mask))
+
+#     toolbox.register("evaluate", eval_individual)
+#     toolbox.register("mate",   tools.cxTwoPoint)
+#     toolbox.register("mutate", tools.mutFlipBit, indpb=0.05)
+#     toolbox.register("select", tools.selTournament, tournsize=3)
+
+#     population = toolbox.population(n=30)
+#     algorithms.eaSimple(population, toolbox, cxpb=0.5, mutpb=0.2, ngen=15, verbose=False)
+
+#     best_ind = tools.selBest(population, 1)[0]
+#     best_mask = [bool(b) for b in best_ind]
+#     selected = sum(best_mask)
+#     print(f"    GA complete. Selected {selected}/{n_features} features "
+#           f"(F1 ≈ {best_ind.fitness.values[0]:.4f})")
+#     return best_mask
+
+
+# # ──────────────────────────────────────────────
+# # Phase 2b — PSO for Hyperparameter Tuning
+# # (Operates on training data only via CV)
+# # ──────────────────────────────────────────────
+
+# def run_pso_optimization(X_train, y_train):
+#     print("\n[*] Starting PSO for Hyperparameter Tuning (LightGBM)...")
+
+#     skf = StratifiedKFold(n_splits=3, shuffle=True, random_state=RANDOM_STATE)
+
+#     def objective_function(params_matrix):
+#         results = []
+#         for p in params_matrix:
+#             lr         = float(np.clip(p[0], 0.01, 0.5))
+#             num_leaves = int(np.clip(p[1], 20, 150))
+#             max_depth  = int(np.clip(p[2], 3, 15))
+#             min_child  = int(np.clip(p[3], 5, 50))
+
+#             clf = lgb.LGBMClassifier(
+#                 learning_rate=lr,
+#                 num_leaves=num_leaves,
+#                 max_depth=max_depth,
+#                 min_child_samples=min_child,
+#                 n_estimators=100,
+#                 verbosity=-1,
+#                 random_state=RANDOM_STATE,
+#                 class_weight="balanced",   # handles residual imbalance post-SMOTE
+#             )
+#             scores = cross_val_score(clf, X_train, y_train, cv=skf, scoring="f1", n_jobs=-1)
+#             results.append(1.0 - scores.mean())   # PSO minimises
+#         return np.array(results)
+
+#     # Bounds: [learning_rate, num_leaves, max_depth, min_child_samples]
+#     lb = np.array([0.01,  20, 3,  5])
+#     ub = np.array([0.50, 150, 15, 50])
+
+#     options = {"c1": 0.5, "c2": 0.3, "w": 0.9}
+#     optimizer = ps.single.GlobalBestPSO(
+#         n_particles=15, dimensions=4, options=options, bounds=(lb, ub)
+#     )
+#     cost, pos = optimizer.optimize(objective_function, iters=15, verbose=False)
+
+#     best_params = {
+#         "learning_rate":    float(np.clip(pos[0], 0.01, 0.5)),
+#         "num_leaves":       int(np.clip(pos[1], 20, 150)),
+#         "max_depth":        int(np.clip(pos[2], 3, 15)),
+#         "min_child_samples":int(np.clip(pos[3], 5, 50)),
+#         "n_estimators":     200,
+#         "class_weight":     "balanced",
+#         "verbosity":        -1,
+#         "random_state":     RANDOM_STATE,
+#     }
+#     print(f"    PSO complete. Best params: {best_params}")
+#     return best_params
+
+
+# # ──────────────────────────────────────────────
+# # Final Evaluation
+# # ──────────────────────────────────────────────
+
+# def evaluate_model(name, model, X_train, y_train, X_test, y_test):
+#     model.fit(X_train, y_train)
+#     y_pred = model.predict(X_test)
+#     y_prob = model.predict_proba(X_test)[:, 1] if hasattr(model, "predict_proba") else None
+
+#     print(f"\n{'='*40}")
+#     print(f"  Model: {name}")
+#     print(f"{'='*40}")
+#     print(classification_report(y_test, y_pred, target_names=["Benign", "Malware"]))
+#     print("Confusion Matrix:")
+#     cm = confusion_matrix(y_test, y_pred)
+#     print(f"  TN={cm[0,0]}  FP={cm[0,1]}")
+#     print(f"  FN={cm[1,0]}  TP={cm[1,1]}")
+#     if y_prob is not None:
+#         try:
+#             auc = roc_auc_score(y_test, y_prob)
+#             print(f"  ROC-AUC: {auc:.4f}")
+#         except Exception:
+#             pass
+
+#     return {
+#         "model":     name,
+#         "accuracy":  accuracy_score(y_test, y_pred),
+#         "precision": precision_score(y_test, y_pred, zero_division=0),
+#         "recall":    recall_score(y_test, y_pred, zero_division=0),
+#         "f1":        f1_score(y_test, y_pred, zero_division=0),
+#     }
+
+
+# def main():
+#     # ── 0. Load data ──
+#     X_train, X_test, y_train, y_test = load_data()
+
+#     # ── 1. Handle class imbalance (training data only) ──
+#     X_train_bal, y_train_bal = apply_smote(X_train, y_train)
+
+#     # ── 2a. Feature selection via GA (training data only) ──
+#     feature_mask = run_genetic_algorithm(X_train_bal, y_train_bal)
+#     selected_cols = X_train.columns[feature_mask].tolist()
+
+#     X_train_sel = X_train_bal[selected_cols]
+#     X_test_sel  = X_test[selected_cols]
+
+#     print(f"\n[*] Selected features ({len(selected_cols)}): {selected_cols[:10]}{'...' if len(selected_cols) > 10 else ''}")
+
+#     # ── 2b. Hyperparameter tuning via PSO (training data only) ──
+#     best_params = run_pso_optimization(X_train_sel, y_train_bal)
+
+#     # ── 3. Scale features (fit on train, transform both) ──
+#     scaler = StandardScaler()
+#     X_train_sc = scaler.fit_transform(X_train_sel)
+#     X_test_sc  = scaler.transform(X_test_sel)
+
+#     # ── 4. Final evaluation ──
+#     results = []
+#     models = {
+#         "LightGBM (Optimised)": lgb.LGBMClassifier(**best_params),
+#         "Random Forest":        RandomForestClassifier(
+#                                     n_estimators=200,
+#                                     class_weight="balanced",
+#                                     random_state=RANDOM_STATE,
+#                                     n_jobs=-1
+#                                 ),
+#         "SVM (RBF)":            SVC(
+#                                     kernel="rbf",
+#                                     class_weight="balanced",
+#                                     probability=True,
+#                                     random_state=RANDOM_STATE,
+#                                 ),
+#     }
+
+#     best_f1    = -1
+#     best_model = None
+#     best_name  = ""
+
+#     for name, model in models.items():
+#         # SVM needs scaled features; tree models work fine on raw or scaled
+#         X_tr = X_train_sc if "SVM" in name else X_train_sel.values
+#         X_te = X_test_sc  if "SVM" in name else X_test_sel.values
+
+#         r = evaluate_model(name, model, X_tr, y_train_bal, X_te, y_test)
+#         results.append(r)
+
+#         if r["f1"] > best_f1:
+#             best_f1    = r["f1"]
+#             best_model = model
+#             best_name  = name
+
+#     # ── 5. Save best model + scaler ──
+#     with open(MODEL_OUTPUT, "wb") as f:
+#         pickle.dump({"model": best_model, "features": selected_cols}, f)
+#     with open(SCALER_OUTPUT, "wb") as f:
+#         pickle.dump(scaler, f)
+
+#     print(f"\n[*] Best model: {best_name} (F1={best_f1:.4f})")
+#     print(f"[*] Saved to {MODEL_OUTPUT} and {SCALER_OUTPUT}")
+
+#     # ── 6. Summary table ──
+#     print("\n--- Summary ---")
+#     df_res = pd.DataFrame(results).set_index("model")
+#     print(df_res.to_string(float_format="{:.4f}".format))
+
+
+# # ──────────────────────────────────────────────
+# # Inference helper — run on a new feature-extracted CSV row
+# # ──────────────────────────────────────────────
+
+# def predict_sample(feature_dict):
+#     """
+#     Given a dict of features (as produced by feature_extractor.py for one APK),
+#     returns (label, probability).
+#     Usage:
+#         from malware_detector import predict_sample
+#         result = predict_sample({"android.permission.INTERNET": 1, ...})
+#     """
+#     with open(MODEL_OUTPUT, "rb") as f:
+#         bundle = pickle.load(f)
+#     with open(SCALER_OUTPUT, "rb") as f:
+#         scaler = pickle.load(f)
+
+#     model    = bundle["model"]
+#     features = bundle["features"]
+
+#     row = pd.DataFrame([{f: feature_dict.get(f, 0) for f in features}])
+
+#     # Scale only if the saved model was SVM (heuristic: check type)
+#     if "SVC" in type(model).__name__:
+#         row = scaler.transform(row)
+
+#     prob  = model.predict_proba(row)[0][1]
+#     label = int(prob >= 0.5)
+#     return label, prob
+
+
+# if __name__ == "__main__":
+#     main()
+
+
+
+pandas
+numpy
+scikit-learn
+imbalanced-learn
+lightgbm
+deap
+pyswarms
+watchdog
+pyyaml
+flask
+pefile
+python-magic

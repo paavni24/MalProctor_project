@@ -1,0 +1,133 @@
+2026-04-25 18:11:41,433 - malware_detection - INFO - Starting download monitor...
+2026-04-25 18:11:41,435 - malware_detection - INFO - Monitoring directory: C:\Users\Nandi/Downloads
+2026-04-25 18:20:57,369 - malware_detection - WARNING - File not found: <MagicMock name='os.path.join()' id='2159937116464'>
+2026-04-25 18:20:57,391 - malware_detection - INFO - Triggering detection on: test.apk
+2026-04-25 18:20:57,885 - malware_detection - INFO - Download monitor started for: C:\Users\Nandi\AppData\Local\Temp\tmpqbk86t16
+2026-04-25 18:20:57,890 - malware_detection - INFO - Monitoring downloads in: C:\Users\Nandi\AppData\Local\Temp\tmpqbk86t16
+2026-04-25 18:20:57,902 - malware_detection - INFO - File watcher started for: C:\Users\Nandi\AppData\Local\Temp\tmpnm0wjspn
+2026-04-25 19:05:37,917 - malware_detection - WARNING - Directory does not exist: /nonexistent/path/that/does/not/exist
+2026-04-25 19:10:25,532 - malware_detection - INFO - Triggering detection on: test.apk
+2026-04-25 19:10:48,982 - malware_detection - WARNING - File not found: /fake/downloads\nonexistent.apk
+2026-04-25 19:10:48,982 - malware_detection - INFO - Triggering detection on: test.apk
+2026-04-25 19:10:49,004 - malware_detection - INFO - Download monitor started for: C:\Users\Nandi\AppData\Local\Temp\tmpkz7optak
+2026-04-25 19:10:49,017 - malware_detection - INFO - File watcher started for: C:\Users\Nandi\AppData\Local\Temp\tmpdnfsgeu_
+2026-04-25 19:25:35,128 - malware_detection - INFO - Download monitor started for: C:\Users\Nandi\AppData\Local\Temp\tmpky2324_l
+2026-04-25 19:25:35,128 - malware_detection - INFO - Monitoring downloads in: C:\Users\Nandi\AppData\Local\Temp\tmpky2324_l
+2026-04-25 19:25:35,128 - malware_detection - INFO - File watcher started for: C:\Users\Nandi\AppData\Local\Temp\tmpky2324_l
+2026-04-25 19:37:38,106 - malware_detection - INFO - Triggering detection on: test.apk
+2026-04-25 20:10:06,876 - malware_detection - INFO - Triggering detection on: test.apk
+2026-04-25 20:11:55,365 - malware_detection - INFO - Triggering detection on: test.apk
+2026-04-25 20:15:31,599 - malware_detection - INFO - Triggering detection on: test.apk
+2026-04-25 20:15:31,603 - malware_detection - WARNING - File not found: /fake/downloads\nonexistent.apk
+2026-04-25 20:15:31,609 - malware_detection - INFO - Triggering detection on: test.apk
+2026-04-25 20:15:31,609 - malware_detection - INFO - Download monitor started for: C:\Users\Nandi\AppData\Local\Temp\tmpir_bi1mm
+2026-04-25 20:15:31,617 - malware_detection - INFO - File watcher started for: C:\Users\Nandi\AppData\Local\Temp\tmpplq6qacc
+2026-04-25 20:22:15,926 - malware_detection - INFO - Download monitor started for: C:\Users\Nandi\AppData\Local\Temp\tmpws94287p
+2026-04-25 20:22:15,930 - malware_detection - INFO - File watcher started for: C:\Users\Nandi\AppData\Local\Temp\tmpws94287p
+2026-04-25 20:23:53,558 - malware_detection - INFO - Triggering detection on: test.apk
+2026-04-25 20:23:53,569 - malware_detection - WARNING - File not found: /fake/downloads\nonexistent.apk
+2026-04-25 20:23:53,573 - malware_detection - INFO - Triggering detection on: test.apk
+2026-04-25 20:23:53,584 - malware_detection - INFO - Download monitor started for: C:\Users\Nandi\AppData\Local\Temp\tmpmssp2oau
+2026-04-25 20:23:53,596 - malware_detection - INFO - File watcher started for: C:\Users\Nandi\AppData\Local\Temp\tmpkkvg5htr
+2026-04-25 20:27:32,672 - malware_detection - INFO - Triggering detection on: test.apk
+2026-04-25 20:27:32,684 - malware_detection - WARNING - File not found: /fake/downloads\nonexistent.apk
+2026-04-25 20:27:32,692 - malware_detection - INFO - Triggering detection on: test.apk
+2026-04-25 20:27:32,700 - malware_detection - INFO - Download monitor started for: C:\Users\Nandi\AppData\Local\Temp\tmpav93chsg
+2026-04-25 20:27:32,714 - malware_detection - INFO - File watcher started for: C:\Users\Nandi\AppData\Local\Temp\tmpcgofs6cr
+2026-04-25 20:38:36,547 - malware_detection - INFO - Download monitor started for: C:\Users\Nandi\AppData\Local\Temp\tmp4s8196pm
+2026-04-25 20:38:36,551 - malware_detection - INFO - File watcher started for: C:\Users\Nandi\AppData\Local\Temp\tmp4s8196pm
+2026-04-25 20:52:27,915 - malware_detection - INFO - Triggering detection on: test.apk
+2026-04-25 20:52:27,919 - malware_detection - WARNING - File not found: /fake/downloads\nonexistent.apk
+2026-04-25 20:52:27,926 - malware_detection - INFO - Download monitor started for: C:\Users\Nandi\AppData\Local\Temp\tmpfwc3zo2c
+2026-04-25 20:52:28,266 - malware_detection - INFO - File watcher started for: C:\Users\Nandi\AppData\Local\Temp\tmpyle0geci
+2026-04-25 20:53:41,311 - malware_detection - INFO - Download monitor started for: C:\Users\Nandi\AppData\Local\Temp\tmpotmi4739
+2026-04-25 20:53:41,311 - malware_detection - INFO - File watcher started for: C:\Users\Nandi\AppData\Local\Temp\tmpotmi4739
+2026-04-25 20:53:46,850 - malware_detection - WARNING - python-magic not available, skipping MIME type detection
+2026-04-25 20:53:49,071 - malware_detection - INFO - Triggering detection on: test.apk
+2026-04-25 20:53:49,083 - malware_detection - WARNING - File not found: /fake/downloads\nonexistent.apk
+2026-04-25 20:53:49,088 - malware_detection - INFO - Download monitor started for: C:\Users\Nandi\AppData\Local\Temp\tmpgefz5pke
+2026-04-25 20:53:49,428 - malware_detection - INFO - File watcher started for: C:\Users\Nandi\AppData\Local\Temp\tmpt4rnr4db
+2026-04-25 20:54:04,398 - malware_detection - INFO - Download monitor started for: C:\Users\Nandi\AppData\Local\Temp\tmpp4asr_da
+2026-04-25 20:54:04,398 - malware_detection - INFO - File watcher started for: C:\Users\Nandi\AppData\Local\Temp\tmpp4asr_da
+2026-04-25 20:54:58,292 - malware_detection - WARNING - python-magic not available, skipping MIME type detection
+2026-04-25 20:54:59,792 - malware_detection - INFO - Triggering detection on: test.apk
+2026-04-25 20:54:59,796 - malware_detection - INFO - Download monitor started for: C:\Users\Nandi\AppData\Local\Temp\tmpaerdi5s5
+2026-04-25 20:55:00,115 - malware_detection - INFO - File watcher started for: C:\Users\Nandi\AppData\Local\Temp\tmpxqmggma6
+2026-04-25 20:55:12,709 - malware_detection - INFO - Download monitor started for: C:\Users\Nandi\AppData\Local\Temp\tmpe8oy9wei
+2026-04-25 20:55:12,709 - malware_detection - INFO - File watcher started for: C:\Users\Nandi\AppData\Local\Temp\tmpe8oy9wei
+2026-04-25 20:58:32,713 - malware_detection - WARNING - python-magic not available, skipping MIME type detection
+2026-04-25 20:58:34,625 - malware_detection - INFO - Triggering detection on: test.apk
+2026-04-25 20:58:34,631 - malware_detection - WARNING - File not found: /fake/downloads\nonexistent.apk
+2026-04-25 20:58:34,637 - malware_detection - INFO - Download monitor started for: C:\Users\Nandi\AppData\Local\Temp\tmpsw70lufv
+2026-04-25 20:58:35,090 - malware_detection - INFO - File watcher started for: C:\Users\Nandi\AppData\Local\Temp\tmp02k8s17y
+2026-04-25 20:59:31,335 - malware_detection - INFO - Download monitor started for: C:\Users\Nandi\AppData\Local\Temp\tmpkxp3wmfo
+2026-04-25 20:59:31,336 - malware_detection - INFO - File watcher started for: C:\Users\Nandi\AppData\Local\Temp\tmpkxp3wmfo
+2026-04-25 20:59:37,274 - malware_detection - WARNING - python-magic not available, skipping MIME type detection
+2026-04-25 20:59:38,757 - malware_detection - INFO - Triggering detection on: test.apk
+2026-04-25 20:59:38,760 - malware_detection - WARNING - File not found: /fake/downloads\nonexistent.apk
+2026-04-25 20:59:38,764 - malware_detection - INFO - Download monitor started for: C:\Users\Nandi\AppData\Local\Temp\tmpi0pso8u4
+2026-04-25 20:59:39,071 - malware_detection - INFO - File watcher started for: C:\Users\Nandi\AppData\Local\Temp\tmp3_m8o0jf
+2026-04-25 21:00:22,091 - malware_detection - INFO - Triggering detection on: test.apk
+2026-04-25 21:00:22,094 - malware_detection - WARNING - File not found: /fake/downloads\nonexistent.apk
+2026-04-25 21:00:22,096 - malware_detection - INFO - Download monitor started for: C:\Users\Nandi\AppData\Local\Temp\tmpg9w3eal4
+2026-04-25 21:00:22,574 - malware_detection - INFO - File watcher started for: C:\Users\Nandi\AppData\Local\Temp\tmpdeepy_yg
+2026-04-25 21:00:31,660 - malware_detection - INFO - Download monitor started for: C:\Users\Nandi\AppData\Local\Temp\tmpecppl0dz
+2026-04-25 21:00:31,660 - malware_detection - INFO - File watcher started for: C:\Users\Nandi\AppData\Local\Temp\tmpecppl0dz
+2026-04-25 21:01:03,647 - malware_detection - INFO - Triggering detection on: test.apk
+2026-04-25 21:01:03,653 - malware_detection - WARNING - File not found: /fake/downloads\nonexistent.apk
+2026-04-25 21:01:03,657 - malware_detection - INFO - Triggering detection on: test.apk
+2026-04-25 21:01:03,661 - malware_detection - INFO - Download monitor started for: C:\Users\Nandi\AppData\Local\Temp\tmpnu039fbg
+2026-04-25 21:01:03,674 - malware_detection - INFO - File watcher started for: C:\Users\Nandi\AppData\Local\Temp\tmpmdk2wqgl
+2026-04-25 21:02:14,469 - malware_detection - INFO - Download monitor started for: C:\Users\Nandi\AppData\Local\Temp\tmpjogqqdz0
+2026-04-25 21:02:14,469 - malware_detection - INFO - File watcher started for: C:\Users\Nandi\AppData\Local\Temp\tmpjogqqdz0
+2026-04-25 21:07:01,823 - malware_detection - INFO - Triggering detection on: test.apk
+2026-04-25 21:07:01,835 - malware_detection - WARNING - File not found: /fake/downloads\nonexistent.apk
+2026-04-25 21:07:01,844 - malware_detection - INFO - Triggering detection on: test.apk
+2026-04-25 21:07:01,871 - malware_detection - INFO - Download monitor started for: C:\Users\Nandi\AppData\Local\Temp\tmpszil7s5v
+2026-04-25 21:07:01,919 - malware_detection - INFO - File watcher started for: C:\Users\Nandi\AppData\Local\Temp\tmpnjt_4sh0
+2026-04-25 21:07:01,940 - malware_detection - INFO - Download monitor started for: C:\Users\Nandi\AppData\Local\Temp\tmpz76zi_l1
+2026-04-25 21:07:01,942 - malware_detection - INFO - File watcher started for: C:\Users\Nandi\AppData\Local\Temp\tmpz76zi_l1
+2026-04-25 21:07:24,946 - malware_detection - WARNING - python-magic not available, skipping MIME type detection
+2026-04-25 21:07:30,508 - malware_detection - INFO - Triggering detection on: test.apk
+2026-04-25 21:07:30,513 - malware_detection - WARNING - File not found: /fake/downloads\nonexistent.apk
+2026-04-25 21:07:30,521 - malware_detection - INFO - Triggering detection on: test.apk
+2026-04-25 21:07:30,525 - malware_detection - INFO - Download monitor started for: C:\Users\Nandi\AppData\Local\Temp\tmpy2brme8u
+2026-04-25 21:07:30,540 - malware_detection - INFO - File watcher started for: C:\Users\Nandi\AppData\Local\Temp\tmpwty7ixsd
+2026-04-25 21:07:30,555 - malware_detection - INFO - Download monitor started for: C:\Users\Nandi\AppData\Local\Temp\tmp_5vb25s2
+2026-04-25 21:07:30,555 - malware_detection - INFO - File watcher started for: C:\Users\Nandi\AppData\Local\Temp\tmp_5vb25s2
+2026-04-25 22:06:47,973 - malware_detection - INFO - Triggering detection on: test.apk
+2026-04-25 22:06:47,977 - malware_detection - WARNING - File not found: /fake/downloads\nonexistent.apk
+2026-04-25 22:06:47,980 - malware_detection - INFO - Triggering detection on: test.apk
+2026-04-25 22:06:47,985 - malware_detection - INFO - Download monitor started for: C:\Users\Nandi\AppData\Local\Temp\tmp7tp72ihp
+2026-04-25 22:06:47,993 - malware_detection - INFO - File watcher started for: C:\Users\Nandi\AppData\Local\Temp\tmpdd5e0stp
+2026-04-25 22:06:48,008 - malware_detection - INFO - Download monitor started for: C:\Users\Nandi\AppData\Local\Temp\tmp57gpzfqn
+2026-04-25 22:06:48,010 - malware_detection - INFO - File watcher started for: C:\Users\Nandi\AppData\Local\Temp\tmp57gpzfqn
+2026-04-25 22:15:04,498 - malware_detection - WARNING - python-magic not available, skipping MIME type detection
+2026-04-25 22:15:06,762 - malware_detection - INFO - Triggering detection on: test.apk
+2026-04-25 22:15:06,772 - malware_detection - WARNING - File not found: /fake/downloads\nonexistent.apk
+2026-04-25 22:15:06,776 - malware_detection - INFO - Triggering detection on: test.apk
+2026-04-25 22:15:06,780 - malware_detection - INFO - Download monitor started for: C:\Users\Nandi\AppData\Local\Temp\tmpowlco0fg
+2026-04-25 22:15:06,787 - malware_detection - INFO - File watcher started for: C:\Users\Nandi\AppData\Local\Temp\tmpa3rf5uww
+2026-04-25 22:15:06,800 - malware_detection - INFO - Download monitor started for: C:\Users\Nandi\AppData\Local\Temp\tmp24k3dfq0
+2026-04-25 22:15:06,802 - malware_detection - INFO - File watcher started for: C:\Users\Nandi\AppData\Local\Temp\tmp24k3dfq0
+2026-04-25 22:46:04,373 - malware_detection - INFO - Triggering detection on: test.apk
+2026-04-25 22:46:04,375 - malware_detection - WARNING - File not found: /fake/downloads\nonexistent.apk
+2026-04-25 22:46:04,378 - malware_detection - INFO - Triggering detection on: test.apk
+2026-04-25 22:46:04,384 - malware_detection - INFO - Download monitor started for: C:\Users\Nandi\AppData\Local\Temp\tmpbn2ecgq_
+2026-04-25 22:46:04,390 - malware_detection - INFO - File watcher started for: C:\Users\Nandi\AppData\Local\Temp\tmpscty0wut
+2026-04-25 22:46:04,398 - malware_detection - INFO - Download monitor started for: C:\Users\Nandi\AppData\Local\Temp\tmpimtg458s
+2026-04-25 22:46:04,404 - malware_detection - INFO - File watcher started for: C:\Users\Nandi\AppData\Local\Temp\tmpimtg458s
+2026-04-26 13:11:22,461 - malware_detection - INFO - Triggering detection on: test.apk
+2026-04-26 13:11:22,470 - malware_detection - WARNING - File not found: /fake/downloads\nonexistent.apk
+2026-04-26 13:11:22,476 - malware_detection - INFO - Triggering detection on: test.apk
+2026-04-26 13:11:22,483 - malware_detection - INFO - Download monitor started for: C:\Users\Nandi\AppData\Local\Temp\tmpp1erzi14
+2026-04-26 13:11:22,499 - malware_detection - INFO - File watcher started for: C:\Users\Nandi\AppData\Local\Temp\tmp6latxfor
+2026-04-26 13:11:22,519 - malware_detection - INFO - Download monitor started for: C:\Users\Nandi\AppData\Local\Temp\tmpp0_w29ga
+2026-04-26 13:11:22,524 - malware_detection - INFO - File watcher started for: C:\Users\Nandi\AppData\Local\Temp\tmpp0_w29ga
+2026-04-26 13:13:49,770 - malware_detection - INFO - Triggering detection on: test.apk
+2026-04-26 13:13:49,776 - malware_detection - WARNING - File not found: /fake/downloads\nonexistent.apk
+2026-04-26 13:13:49,789 - malware_detection - INFO - Triggering detection on: test.apk
+2026-04-26 13:13:49,797 - malware_detection - INFO - Download monitor started for: C:\Users\Nandi\AppData\Local\Temp\tmpp4k85ahv
+2026-04-26 13:13:49,819 - malware_detection - INFO - File watcher started for: C:\Users\Nandi\AppData\Local\Temp\tmpj7os5jwv
+2026-04-26 13:13:49,838 - malware_detection - INFO - Download monitor started for: C:\Users\Nandi\AppData\Local\Temp\tmpqhrelvnp
+2026-04-26 13:13:49,840 - malware_detection - INFO - File watcher started for: C:\Users\Nandi\AppData\Local\Temp\tmpqhrelvnp
