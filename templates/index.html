@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MalProctor</title>
+  <meta name="description" content="AI-powered Android APK malware scanner. Upload an APK to instantly detect malware." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:       #f5f0eb;
+      --surface:  #fdfaf7;
+      --card:     #ffffff;
+      --border:   #e8e0d8;
+      --text:     #2d2926;
+      --muted:    #9c8f85;
+      --safe:     #7ec8a0;
+      --safe-bg:  #edf7f2;
+      --safe-bd:  #b8e4cc;
+      --danger:   #e07b7b;
+      --danger-bg:#fdf0f0;
+      --danger-bd:#f0c0c0;
+      --accent:   #a89bd4;
+      --accent-bg:#f2f0fa;
+      --shadow:   0 2px 20px rgba(45,41,38,0.06);
+      --shadow-lg: 0 8px 40px rgba(45,41,38,0.10);
+      --radius:   20px;
+      --radius-sm: 12px;
+    }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    /* subtle noise texture */
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.015'/%3E%3C/svg%3E");
+      pointer-events: none; z-index: 0;
+    }
+
+    /* ── Layout ── */
+    .page {
+      position: relative; z-index: 1;
+      width: 100%; max-width: 480px;
+      min-height: 100vh;
+      display: flex; flex-direction: column;
+      align-items: center;
+      padding: 60px 24px 48px;
+    }
+
+    /* ── Logo / header ── */
+    .logo-wrap {
+      display: flex; align-items: center; gap: 10px;
+      margin-bottom: 10px;
+    }
+    .logo-icon {
+      width: 38px; height: 38px;
+      background: linear-gradient(135deg, #c5b8f0, #a89bd4);
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.1rem;
+      box-shadow: 0 2px 12px rgba(168,155,212,0.35);
+    }
+    .logo-text {
+      font-size: 1.2rem; font-weight: 600;
+      letter-spacing: -0.02em;
+    }
+    .tagline {
+      font-size: 0.82rem; color: var(--muted);
+      font-weight: 400; margin-bottom: 52px;
+      font-style: italic;
+    }
+
+    /* ── Upload card ── */
+    .card {
+      width: 100%;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .drop-zone {
+      padding: 52px 32px;
+      text-align: center;
+      cursor: pointer;
+      transition: background 0.2s, border-color 0.2s;
+    }
+    .drop-zone:hover    { background: #fdf8f4; }
+    .drop-zone.drag-over { background: var(--accent-bg); }
+
+    .drop-illustration {
+      width: 80px; height: 80px;
+      margin: 0 auto 20px;
+      background: var(--accent-bg);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 2rem;
+      transition: transform 0.3s ease;
+    }
+    .drop-zone:hover .drop-illustration { transform: scale(1.05); }
+    .drop-zone.drag-over .drop-illustration { transform: scale(1.1); }
+
+    .drop-zone h2 {
+      font-size: 1.05rem; font-weight: 600;
+      letter-spacing: -0.02em; margin-bottom: 6px;
+    }
+    .drop-zone p {
+      font-size: 0.82rem; color: var(--muted); margin-bottom: 24px; line-height: 1.5;
+    }
+    #file-input { display: none; }
+    .browse-lbl {
+      display: inline-block;
+      font-size: 0.82rem; font-weight: 500;
+      color: var(--accent);
+      background: var(--accent-bg);
+      border: 1px solid #d4cff0;
+      padding: 8px 20px; border-radius: 100px;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.15s;
+    }
+    .browse-lbl:hover { background: #e8e4f8; transform: translateY(-1px); }
+
+    .card-divider {
+      height: 1px; background: var(--border); margin: 0 24px;
+    }
+
+    /* Selected file row */
+    .file-row {
+      display: none; align-items: center; gap: 12px;
+      padding: 16px 24px;
+    }
+    .file-row.show { display: flex; }
+    .file-row-icon {
+      width: 36px; height: 36px; flex-shrink: 0;
+      background: var(--accent-bg);
+      border-radius: 9px; font-size: 1.1rem;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .file-row-info { flex: 1; min-width: 0; }
+    .file-row-name {
+      font-size: 0.85rem; font-weight: 500;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .file-row-size { font-size: 0.72rem; color: var(--muted); margin-top: 2px; }
+    .file-row-clear {
+      background: none; border: none; cursor: pointer;
+      color: var(--muted); font-size: 1rem; padding: 4px;
+      transition: color 0.15s;
+    }
+    .file-row-clear:hover { color: var(--danger); }
+
+    /* Scan button */
+    #scan-btn {
+      display: none; width: 100%; margin-top: 12px;
+      background: linear-gradient(135deg, #c5b8f0 0%, #a89bd4 100%);
+      color: #3d3366; font-family: 'DM Sans', sans-serif;
+      font-weight: 600; font-size: 0.92rem; letter-spacing: -0.01em;
+      padding: 14px; border-radius: var(--radius-sm); border: none; cursor: pointer;
+      box-shadow: 0 4px 20px rgba(168,155,212,0.4);
+      transition: opacity 0.2s, transform 0.2s, box-shadow 0.2s;
+    }
+    #scan-btn.show { display: block; }
+    #scan-btn:hover { opacity: 0.9; transform: translateY(-1px); box-shadow: 0 6px 28px rgba(168,155,212,0.5); }
+    #scan-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+    /* ── Scanning state ── */
+    #scanning-state { display: none; }
+    #scanning-state.show { display: block; }
+    .scan-card {
+      width: 100%; background: var(--card);
+      border: 1px solid var(--border); border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 40px 32px; text-align: center; margin-top: 12px;
+    }
+    .pulse-ring {
+      width: 72px; height: 72px; margin: 0 auto 20px;
+      border-radius: 50%;
+      background: var(--accent-bg);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.6rem;
+      animation: pulse 1.8s ease-in-out infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(168,155,212,0.4); }
+      50% { box-shadow: 0 0 0 14px rgba(168,155,212,0); }
+    }
+    .scan-title {
+      font-size: 0.98rem; font-weight: 600; margin-bottom: 6px;
+    }
+    .scan-sub { font-size: 0.8rem; color: var(--muted); margin-bottom: 28px; }
+    .step-list { list-style: none; text-align: left; display: flex; flex-direction: column; gap: 8px; }
+    .step-item {
+      display: flex; align-items: center; gap: 10px;
+      font-size: 0.81rem; color: var(--muted);
+      padding: 9px 14px;
+      border-radius: 10px;
+      background: var(--bg);
+      border: 1px solid transparent;
+      opacity: 0.4;
+      transition: all 0.4s ease;
+    }
+    .step-item.active {
+      opacity: 1; color: var(--text);
+      background: var(--surface);
+      border-color: var(--border);
+    }
+    .step-dot {
+      width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0;
+      background: var(--border);
+      transition: background 0.4s;
+    }
+    .step-item.active .step-dot { background: var(--accent); }
+
+    /* ── Results ── */
+    #results { display: none; animation: riseUp 0.45s cubic-bezier(0.16,1,0.3,1); }
+    #results.show { display: block; }
+    @keyframes riseUp { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:none; } }
+
+    .verdict-card {
+      width: 100%; border-radius: var(--radius);
+      border: 1px solid; box-shadow: var(--shadow-lg);
+      overflow: hidden;
+    }
+    .verdict-header {
+      padding: 40px 32px 28px; text-align: center;
+    }
+    .verdict-icon-wrap {
+      width: 72px; height: 72px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 2rem; margin: 0 auto 16px;
+    }
+    .verdict-label {
+      font-size: 1.4rem; font-weight: 600; letter-spacing: -0.03em;
+      margin-bottom: 6px;
+    }
+    .verdict-sub { font-size: 0.83rem; line-height: 1.5; max-width: 300px; margin: 0 auto; }
+
+    .verdict-card.safe {
+      border-color: var(--safe-bd);
+      background: var(--safe-bg);
+    }
+    .verdict-card.safe .verdict-icon-wrap { background: rgba(126,200,160,0.2); }
+    .verdict-card.safe .verdict-label { color: #3d9a6e; }
+    .verdict-card.safe .verdict-sub { color: #6aad8b; }
+
+    .verdict-card.malware {
+      border-color: var(--danger-bd);
+      background: var(--danger-bg);
+    }
+    .verdict-card.malware .verdict-icon-wrap { background: rgba(224,123,123,0.2); }
+    .verdict-card.malware .verdict-label { color: #b75555; }
+    .verdict-card.malware .verdict-sub { color: #c07070; }
+
+    /* Confidence bar */
+    .conf-row {
+      display: flex; align-items: center; gap: 12px;
+      padding: 16px 32px;
+      border-top: 1px solid;
+    }
+    .verdict-card.safe  .conf-row { border-color: var(--safe-bd); background: rgba(126,200,160,0.07); }
+    .verdict-card.malware .conf-row { border-color: var(--danger-bd); background: rgba(224,123,123,0.07); }
+    .conf-label { font-size: 0.75rem; font-weight: 500; color: var(--muted); flex-shrink: 0; }
+    .conf-bar-track {
+      flex: 1; height: 6px; border-radius: 100px;
+      background: rgba(0,0,0,0.06); overflow: hidden;
+    }
+    .conf-bar-fill {
+      height: 100%; border-radius: 100px; width: 0%;
+      transition: width 1.2s cubic-bezier(0.16,1,0.3,1);
+    }
+    .verdict-card.safe    .conf-bar-fill { background: var(--safe); }
+    .verdict-card.malware .conf-bar-fill { background: var(--danger); }
+    .conf-val { font-size: 0.8rem; font-weight: 600; flex-shrink: 0; font-family: 'DM Mono', monospace; }
+
+    /* Detail sections */
+    .details-wrap { width: 100%; margin-top: 12px; display: flex; flex-direction: column; gap: 8px; }
+    .detail-block {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      overflow: hidden;
+    }
+    .detail-toggle {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 14px 18px; cursor: pointer; user-select: none;
+    }
+    .detail-toggle:hover { background: #faf7f4; }
+    .detail-toggle-left { display: flex; align-items: center; gap: 10px; }
+    .detail-toggle-tag {
+      font-size: 0.72rem; font-weight: 600;
+      padding: 2px 8px; border-radius: 100px;
+    }
+    .detail-toggle-tag.warn { background: #fef3e8; color: #c4813a; border: 1px solid #f5d9b3; }
+    .detail-toggle-tag.info { background: var(--accent-bg); color: #6b5fb0; border: 1px solid #d4cff0; }
+    .detail-title { font-size: 0.85rem; font-weight: 500; }
+    .detail-arrow { color: var(--muted); font-size: 0.7rem; transition: transform 0.2s; }
+    .detail-toggle.open .detail-arrow { transform: rotate(180deg); }
+    .detail-content {
+      display: none; padding: 4px 18px 16px;
+      max-height: 200px; overflow-y: auto;
+      scrollbar-width: thin; scrollbar-color: var(--border) transparent;
+    }
+    .detail-content.open { display: block; }
+    .tag-mono {
+      display: inline-block;
+      font-family: 'DM Mono', monospace;
+      font-size: 0.71rem;
+      padding: 3px 8px; border-radius: 6px; margin: 2px;
+    }
+    .tag-mono.perm { background: var(--accent-bg); color: #6b5fb0; }
+    .tag-mono.api  { background: #fef3e8; color: #c4813a; }
+    .tag-mono.sus  { background: #fdf0f0; color: #b75555; border: 1px solid #f0c0c0; }
+    .empty-note { font-size: 0.78rem; color: var(--muted); font-style: italic; padding: 4px 0; }
+
+    /* Reset */
+    #reset-btn {
+      display: none; width: 100%; margin-top: 8px;
+      background: none; border: 1px solid var(--border);
+      color: var(--muted); font-family: 'DM Sans', sans-serif;
+      font-size: 0.82rem; font-weight: 500;
+      padding: 12px; border-radius: var(--radius-sm); cursor: pointer;
+      transition: all 0.15s;
+    }
+    #reset-btn.show { display: block; }
+    #reset-btn:hover { border-color: #c5b8f0; color: var(--text); }
+
+    /* Error */
+    #error-msg {
+      display: none; width: 100%; margin-top: 12px;
+      background: var(--danger-bg); border: 1px solid var(--danger-bd);
+      border-radius: var(--radius-sm);
+      padding: 12px 16px; font-size: 0.82rem; color: #b75555;
+    }
+    #error-msg.show { display: block; }
+
+    footer {
+      margin-top: auto; padding-top: 48px;
+      font-size: 0.72rem; color: var(--muted); text-align: center;
+    }
+  </style>
+</head>
+<body>
+<div class="page">
+
+  <!-- Header -->
+  <div class="logo-wrap">
+    <div class="logo-icon">🛡</div>
+    <span class="logo-text">MalProctor</span>
+  </div>
+  <p class="tagline">Intelligent APK malware detection</p>
+
+  <!-- Upload card -->
+  <div class="card" id="upload-card">
+    <div class="drop-zone" id="drop-zone">
+      <div class="drop-illustration">📦</div>
+      <h2>Upload an APK file</h2>
+      <p>Drop it here or click to browse.<br/>Supports .apk files up to 200 MB.</p>
+      <label for="file-input" class="browse-lbl">Choose file</label>
+      <input type="file" id="file-input" accept=".apk" />
+    </div>
+    <div class="card-divider" id="file-divider" style="display:none"></div>
+    <div class="file-row" id="file-row">
+      <div class="file-row-icon">📄</div>
+      <div class="file-row-info">
+        <div class="file-row-name" id="file-name-display"></div>
+        <div class="file-row-size" id="file-size-display"></div>
+      </div>
+      <button class="file-row-clear" id="clear-file-btn" title="Remove">✕</button>
+    </div>
+  </div>
+
+  <button id="scan-btn">Analyse APK →</button>
+  <div id="error-msg"></div>
+
+  <!-- Scanning -->
+  <div id="scanning-state">
+    <div class="scan-card">
+      <div class="pulse-ring">🔍</div>
+      <p class="scan-title">Analysing your file…</p>
+      <p class="scan-sub">This may take up to 90 seconds.</p>
+      <ul class="step-list">
+        <li class="step-item" id="step-1"><span class="step-dot"></span>Decompiling APK</li>
+        <li class="step-item" id="step-2"><span class="step-dot"></span>Reading permissions</li>
+        <li class="step-item" id="step-3"><span class="step-dot"></span>Scanning bytecode</li>
+        <li class="step-item" id="step-4"><span class="step-dot"></span>Running ML model</li>
+        <li class="step-item" id="step-5"><span class="step-dot"></span>Generating verdict</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Results -->
+  <div id="results">
+    <div class="verdict-card" id="verdict-card">
+      <div class="verdict-header">
+        <div class="verdict-icon-wrap" id="verdict-icon-wrap">
+          <span id="verdict-icon"></span>
+        </div>
+        <div class="verdict-label" id="verdict-label"></div>
+        <p class="verdict-sub" id="verdict-sub"></p>
+      </div>
+      <div class="conf-row">
+        <span class="conf-label">Confidence</span>
+        <div class="conf-bar-track">
+          <div class="conf-bar-fill" id="conf-bar"></div>
+        </div>
+        <span class="conf-val" id="conf-val">0%</span>
+      </div>
+    </div>
+
+    <div class="details-wrap" id="details-wrap"></div>
+
+    <button id="reset-btn">↩ Scan another file</button>
+  </div>
+
+  <footer>MalProctor &mdash; Powered by machine learning</footer>
+</div>
+
+<script>
+  const dropZone    = document.getElementById('drop-zone');
+  const fileInput   = document.getElementById('file-input');
+  const fileRow     = document.getElementById('file-row');
+  const fileDivider = document.getElementById('file-divider');
+  const fileNameEl  = document.getElementById('file-name-display');
+  const fileSizeEl  = document.getElementById('file-size-display');
+  const clearBtn    = document.getElementById('clear-file-btn');
+  const scanBtn     = document.getElementById('scan-btn');
+  const scanning    = document.getElementById('scanning-state');
+  const results     = document.getElementById('results');
+  const errorMsg    = document.getElementById('error-msg');
+  const resetBtn    = document.getElementById('reset-btn');
+  const uploadCard  = document.getElementById('upload-card');
+
+  let selectedFile = null;
+
+  // ── File pick ──
+  fileInput.addEventListener('change', e => { if (e.target.files[0]) pickFile(e.target.files[0]); });
+  clearBtn.addEventListener('click', clearFile);
+  dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('drag-over'); });
+  dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
+  dropZone.addEventListener('drop', e => {
+    e.preventDefault(); dropZone.classList.remove('drag-over');
+    if (e.dataTransfer.files[0]) pickFile(e.dataTransfer.files[0]);
+  });
+
+  function pickFile(file) {
+    if (!file.name.toLowerCase().endsWith('.apk')) {
+      showErr('Please choose a valid .apk file.'); return;
+    }
+    hideErr();
+    selectedFile = file;
+    fileNameEl.textContent = file.name;
+    fileSizeEl.textContent = (file.size / 1024 / 1024).toFixed(1) + ' MB';
+    fileRow.classList.add('show');
+    fileDivider.style.display = '';
+    scanBtn.classList.add('show');
+  }
+
+  function clearFile() {
+    selectedFile = null; fileInput.value = '';
+    fileRow.classList.remove('show');
+    fileDivider.style.display = 'none';
+    scanBtn.classList.remove('show');
+    hideErr();
+  }
+
+  // ── Scan ──
+  scanBtn.addEventListener('click', () => { if (selectedFile) startScan(); });
+
+  async function startScan() {
+    scanBtn.disabled = true;
+    uploadCard.style.display = 'none';
+    scanBtn.style.display = 'none';
+    results.classList.remove('show'); results.style.display = 'none';
+    resetBtn.classList.remove('show');
+    hideErr();
+
+    scanning.classList.add('show'); scanning.style.display = 'block';
+    animateSteps();
+
+    const fd = new FormData();
+    fd.append('file', selectedFile);
+
+    try {
+      const res  = await fetch('/api/scan', { method: 'POST', body: fd });
+      const data = await res.json();
+      await new Promise(r => setTimeout(r, 500));
+
+      if (data.error) { showErr('Scan error: ' + data.error); resetUpload(); return; }
+      renderResults(data);
+    } catch(e) {
+      showErr('Network error: ' + e.message); resetUpload();
+    } finally {
+      scanning.classList.remove('show'); scanning.style.display = 'none';
+      document.querySelectorAll('.step-item').forEach(s => s.classList.remove('active'));
+    }
+  }
+
+  function animateSteps() {
+    document.querySelectorAll('.step-item').forEach((s, i) =>
+      setTimeout(() => s.classList.add('active'), i * 2200)
+    );
+  }
+
+  // ── Render Results ──
+  function renderResults(data) {
+    const bad = data.verdict === 'MALWARE';
+    const card = document.getElementById('verdict-card');
+    card.className = 'verdict-card ' + (bad ? 'malware' : 'safe');
+
+    document.getElementById('verdict-icon').textContent = bad ? '✕' : '✓';
+    document.getElementById('verdict-label').textContent = bad ? 'Malware detected' : 'No threats found';
+    document.getElementById('verdict-sub').textContent   = bad
+      ? 'This APK contains patterns associated with malicious software.'
+      : 'This APK appears to be clean and safe to use.';
+
+    const pct = Math.round((data.confidence || 0) * 100);
+    document.getElementById('conf-val').textContent = pct + '%';
+    setTimeout(() => { document.getElementById('conf-bar').style.width = pct + '%'; }, 80);
+
+    // Detail blocks
+    const wrap = document.getElementById('details-wrap');
+    wrap.innerHTML = '';
+
+    const sus = data.suspicious_features || [];
+    if (sus.length) {
+      wrap.appendChild(makeDetail(
+        'suspicious-block',
+        `<span class="detail-toggle-tag warn">${sus.length} flagged</span>`,
+        'Suspicious features',
+        sus.map(f => `<span class="tag-mono sus">${f.name}</span>`).join(''),
+        true
+      ));
+    }
+
+    const perms = data.permissions_found || [];
+    wrap.appendChild(makeDetail(
+      'perms-block',
+      `<span class="detail-toggle-tag info">${perms.length}</span>`,
+      'Permissions requested',
+      perms.length
+        ? perms.map(p => `<span class="tag-mono perm">${p}</span>`).join('')
+        : '<span class="empty-note">None detected</span>'
+    ));
+
+    const apis = data.api_calls_found || [];
+    wrap.appendChild(makeDetail(
+      'apis-block',
+      `<span class="detail-toggle-tag info">${apis.length}</span>`,
+      'Suspicious API calls',
+      apis.length
+        ? apis.map(a => `<span class="tag-mono api">${a}</span>`).join('')
+        : '<span class="empty-note">None detected</span>'
+    ));
+
+    results.style.display = 'block'; results.classList.add('show');
+    resetBtn.classList.add('show');
+  }
+
+  function makeDetail(id, tagHtml, title, bodyHtml, openByDefault=false) {
+    const block = document.createElement('div');
+    block.className = 'detail-block';
+    block.id = id;
+    block.innerHTML = `
+      <div class="detail-toggle ${openByDefault ? 'open' : ''}" onclick="toggleDetail('${id}')">
+        <div class="detail-toggle-left">
+          ${tagHtml}
+          <span class="detail-title">${title}</span>
+        </div>
+        <span class="detail-arrow">▼</span>
+      </div>
+      <div class="detail-content ${openByDefault ? 'open' : ''}">${bodyHtml}</div>
+    `;
+    return block;
+  }
+
+  function toggleDetail(id) {
+    const block = document.getElementById(id);
+    const toggle  = block.querySelector('.detail-toggle');
+    const content = block.querySelector('.detail-content');
+    toggle.classList.toggle('open');
+    content.classList.toggle('open');
+  }
+
+  // ── Reset ──
+  resetBtn.addEventListener('click', resetAll);
+  function resetAll() {
+    clearFile();
+    uploadCard.style.display = ''; scanBtn.style.display = '';
+    results.classList.remove('show'); results.style.display = 'none';
+    resetBtn.classList.remove('show');
+    scanBtn.disabled = false;
+    document.getElementById('details-wrap').innerHTML = '';
+  }
+
+  function resetUpload() {
+    uploadCard.style.display = ''; scanBtn.style.display = '';
+    scanBtn.classList.add('show'); scanBtn.disabled = false;
+  }
+
+  function showErr(msg) { errorMsg.textContent = '⚠ ' + msg; errorMsg.classList.add('show'); }
+  function hideErr() { errorMsg.classList.remove('show'); }
+</script>
+</body>
+</html>

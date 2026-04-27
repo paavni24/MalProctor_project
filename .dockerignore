@@ -1,0 +1,38 @@
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Dev/training files (not needed in production)
+src/
+tests/
+and_mal/
+*.log
+report.log
+pytest.ini
+config.yaml
+.env
+.vscode/
+.DS_Store
+
+# Temp files
+temp_uploads/
+temp_decompiled/
+
+# Local apktool binary (Docker downloads its own)
+bin/
+
+# Large training data
+data/TUANDROMD.csv
+data/dataset.csv
+
+# Git
+.git/
+.gitignore
