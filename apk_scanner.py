@@ -24,7 +24,8 @@ BASE_DIR    = os.path.dirname(os.path.abspath(__file__))
 MODEL_PATH  = os.path.join(BASE_DIR, "data", "best_model.pkl")
 SCALER_PATH = os.path.join(BASE_DIR, "data", "scaler.pkl")
 TEMP_DIR    = os.path.join(BASE_DIR, "temp_decompiled")
-APKTOOL     = os.path.join(BASE_DIR, "bin", "apktool")   # local binary
+# Find apktool: system PATH first (Docker/Railway), then local bin/
+APKTOOL     = shutil.which("apktool") or os.path.join(BASE_DIR, "bin", "apktool")
 
 # ── TUANDROMD Feature Columns ──
 # These are the 241 columns from the training dataset (excluding Label).
