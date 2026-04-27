@@ -1,15 +1,23 @@
 """Flask backend for MalProctor APK Scanner."""
 import os
 import uuid
-import tempfile
+import subprocess
 from flask import Flask, render_template, request, jsonify
-from apk_scanner import scan_apk
+from apk_scanner import scan_apk, APKTOOL
 
 app = Flask(__name__)
 app.config["MAX_CONTENT_LENGTH"] = 200 * 1024 * 1024  # 200MB max upload
 
 UPLOAD_FOLDER = os.path.join(os.path.dirname(__file__), "temp_uploads")
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+
+# ── Startup diagnostics ──
+print(f"[*] apktool path: {APKTOOL}")
+try:
+    v = subprocess.check_output([APKTOOL, "--version"], stderr=subprocess.STDOUT, timeout=10).decode().strip()
+    print(f"[*] apktool version: {v}")
+except Exception as e:
+    print(f"[!] apktool not working: {e}")
 
 
 @app.route("/")
